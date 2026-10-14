@@ -5,7 +5,7 @@ Write project-root `USAGE.md` from the verified tool inventory and tested runtim
 Include:
 
 - Scientific purpose and actual supported scope, including important deferred/excluded operations and required assumptions.
-- Tested Python/R/native versions, pinned source, dependencies, data/model prerequisites, and runtime credentials supplied without revealing secrets.
+- Tested Python/R/native versions, pinned source, dependencies, data/model prerequisites, and runtime credentials supplied without revealing secrets. For [external artifacts](../external-artifacts.md), list each name, description, size, license, and source, `MCP_ARTIFACTS_DIR`, and `python mcp_artifacts.py fetch --default` as an installation step.
 - Installation/restoration commands runnable from the extracted package, working directory, interpreter/executable configuration, and a direct server launch command. Include any permission-restoration step needed after extraction.
 - Each final MCP tool name, when to use it, required inputs, meaningful parameters/defaults, and output artifacts. Describe composition through explicit artifacts where supported. Do not require a separate examples directory or reference fixtures omitted from the package.
 - Actual test/runtime outcomes and their limits, including required external services or hardware not exercised.
