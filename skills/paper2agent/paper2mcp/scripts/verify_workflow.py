@@ -390,8 +390,54 @@ def _complete(root, state, current, excluded_tools, result):
         interpreters.add(report["python"])
     require(len(servers) == 1, "Runtime reports refer to different servers")
     require(len(interpreters) == 2, "Project and clean runtime reports reuse the same Python interpreter")
+    _check_artifacts(root, files, expected, cases, result)
     result["exposed_tools"] = sorted(expected)
     result["completion_files_checked"] = len(files)
+
+
+# Argument names that carry model weights or reference data; see external-artifacts.md.
+ARTIFACT_ARGUMENT = re.compile(r"(model|checkpoint|ckpt|weight|artifact)", re.IGNORECASE)
+
+
+def _check_artifacts(root, files, expected, cases, result):
+    """Enforce the external-artifact contract (references/external-artifacts.md)."""
+    manifest_path = root / "src" / "artifacts.json"
+    by_path = sorted({
+        f"{case['name']}:{key}" for case in cases for key, value in case["arguments"].items()
+        if ARTIFACT_ARGUMENT.search(key) and isinstance(value, str) and Path(value).is_absolute()
+    })
+    if not manifest_path.exists():
+        require(not by_path, "Acceptance cases pass model/data artifacts by absolute path "
+                f"({', '.join(by_path)}) without src/artifacts.json; declare them as named artifacts")
+        return
+    helper = Path(__file__).resolve().parent / "mcp_artifacts.py"
+    for name in ("src/artifacts.json", "src/mcp_artifacts.py"):
+        require(name in files, f"{name} must be pinned in completion.files")
+    require(digest(resolve(root, "src/mcp_artifacts.py")) == digest(helper),
+            "src/mcp_artifacts.py must be an unmodified copy of the skill's scripts/mcp_artifacts.py")
+    sys.path.insert(0, str(helper.parent))
+    try:
+        from mcp_artifacts import validate_manifest
+    finally:
+        sys.path.pop(0)
+    manifest = read_json(manifest_path)
+    errors = validate_manifest(manifest)
+    require(not errors, "Invalid src/artifacts.json: " + "; ".join(errors))
+    for art in manifest["artifacts"]:
+        unknown = set(art["used_by"]) - set(expected)
+        require(not unknown, f"Artifact {art['name']!r} is used by tools not in the inventory: {sorted(unknown)}")
+        if art.get("supported", True) is False:
+            continue
+        for tool in art["used_by"]:
+            named = any(
+                case["tool"] == tool and "error_contains" not in case
+                and art["name"] in case["arguments"].values()
+                for case in cases
+            )
+            require(named, f"No positive acceptance case runs {tool} with artifact {art['name']!r} by name")
+    listers = [tool for tool in expected if tool.endswith("list_artifacts")]
+    require(len(listers) == 1, "Servers with external artifacts expose exactly one *list_artifacts tool")
+    result["artifacts"] = [art["name"] for art in manifest["artifacts"]]
 
 
 def _protect_report(root, state_path, state, destination):

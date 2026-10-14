@@ -39,7 +39,7 @@ Replace illustrative names, paths, and numbers with independently verified value
 
 Choose stable summaries or integer/shape fields for exact JSON comparisons. Use the scientific tests for floating-point tolerances, full matrix comparisons, and figure content; the helper does not open files to compare their scientific values. Do not relax a scientific comparator to fit an exact JSON field check.
 
-Include at least one successful case per exposed tool, schema expectations for each tool, negative input cases where applicable, and repeated calls for tools producing new files. An expected error or timeout does not count as a successful execution case. Use fresh outputs for each runtime run and make any dependent inputs explicit.
+Pass models and reference data by artifact name as described in [external artifacts](external-artifacts.md); the workflow gate rejects absolute artifact paths without a manifest. Include at least one successful case per exposed tool, schema expectations for each tool, negative input cases where applicable, and repeated calls for tools producing new files. An expected error or timeout does not count as a successful execution case. Use fresh outputs for each runtime run and make any dependent inputs explicit.
 
 ## Execute and assess
 

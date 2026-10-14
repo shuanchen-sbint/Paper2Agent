@@ -10,7 +10,7 @@ Build an explicit staging directory with one top-level `<repo-name>-mcp/` folder
 - The server entry point, all required tool modules and runtime helpers, and pinned Python runtime requirements.
 - The original scientific implementation: include the required source, package, or native executable with provenance and relevant notices, or document and test installation from a fixed version/commit. Runtime imports and subprocesses must not depend on the build workspace.
 - Route-specific runtime material: R scripts and lock/bootstrap files, or required CLI executables/build instructions with version, platform, and shared-library requirements. Retain relevant source/license notices.
-- Configuration templates only when required. Supply credentials at runtime. Large models or reference data may remain external when their identity, location/acquisition, and configuration are documented and tested.
+- Configuration templates only when required. Supply credentials at runtime. Large models or reference data stay external as [named artifacts](external-artifacts.md): ship `artifacts.json` and the unmodified `mcp_artifacts.py` beside the server entry point, not the artifact contents.
 
 Keep the package as small as the actual runtime allows. Do not add `examples/`, test fixtures, test suites, notebooks, reports, agent records, environments, caches, `.git`, secrets, or intermediate outputs by default. Files genuinely needed at runtime must be included or installed explicitly even if upstream stores them in a directory named `data` or `examples`.
 
